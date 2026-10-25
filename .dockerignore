@@ -1,0 +1,18 @@
+# Docker の箱に入れないもの（サイズ削減と、秘密情報を入れないため）
+node_modules
+.next
+.git
+.github
+.claude
+src/generated
+*.tsbuildinfo
+npm-debug.log*
+
+# 環境変数ファイル（パスワードやキーが入っているので絶対に入れない）
+.env*
+!.env.example
+
+# 開発用の設定
+docker
+docker-compose.yml
+compose.prod.yml

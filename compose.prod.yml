@@ -1,0 +1,56 @@
+# 本番用の構成：MySQL → マイグレーション → アプリ の順に起動する
+# 起動方法：docker compose -f compose.prod.yml --env-file .env.production up -d --build
+# HTTPS の受付係（Caddy または Nginx）は、サーバーに公開するときに追加する
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    # メモリ1GBのサーバーで動かすため、MySQL の使用メモリを抑える
+    command:
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=30
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD を .env.production に設定してください}
+      MYSQL_DATABASE: recipe_movie_note
+      MYSQL_USER: app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD を .env.production に設定してください}
+      TZ: Asia/Tokyo
+    volumes:
+      - db-data:/var/lib/mysql
+    # DB が接続を受け付けられる状態になったかを確認する
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "app", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # 外からは直接つながせない（アプリからだけ使う）
+
+  migrate:
+    build:
+      context: .
+      target: migrator
+    environment:
+      DATABASE_URL: mysql://app:${MYSQL_PASSWORD}@db:3306/recipe_movie_note
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      DATABASE_URL: mysql://app:${MYSQL_PASSWORD}@db:3306/recipe_movie_note
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "3000:3000"
+
+volumes:
+  db-data:
