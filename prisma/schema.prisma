@@ -1,0 +1,115 @@
+// レシピムービー帳のテーブル定義
+// ログイン用の Account テーブルは、Auth.js を導入するとき（第3週）に追加する
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ===== ユーザー =====
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  image          String?
+  isGuest        Boolean   @default(false) // お試しアカウントかどうか
+  guestExpiresAt DateTime? // この日時を過ぎたら自動で削除する
+  createdAt      DateTime  @default(now())
+
+  recipes       Recipe[]
+  categories    Category[]
+  shoppingList  ShoppingListEntry[]
+  aiExtractions AiExtraction[]
+}
+
+// ===== レシピ =====
+model Recipe {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @db.VarChar(100) // ユーザーが付けるレシピ名（初期値は動画タイトル）
+  videoId   String?  @db.VarChar(20) // YouTube の動画ID（手入力レシピ用に空も許可）
+  servings  Int      @default(2) // 何人分（買い物リストの計算に使う）
+  memo      String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredients  Ingredient[]
+  steps        RecipeStep[]
+  categories   Category[]
+  shoppingList ShoppingListEntry[]
+
+  @@unique([userId, videoId]) // 同じ人が同じ動画を2回登録できない
+  @@index([userId, createdAt])
+}
+
+model Ingredient {
+  id          String  @id @default(cuid())
+  recipeId    String
+  name        String  @db.VarChar(50) // 玉ねぎ
+  amountText  String  @db.VarChar(50) // 大さじ1と1/2（表示用の原文）
+  quantity    Float? // 1.5（少々・適量は空）
+  unit        String? @db.VarChar(20) // 大さじ
+  isSeasoning Boolean @default(false) // 調味料かどうか
+  sortOrder   Int
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId, sortOrder])
+}
+
+model RecipeStep {
+  id           String @id @default(cuid())
+  recipeId     String
+  sortOrder    Int
+  text         String @db.Text
+  startSeconds Int? // 動画の何秒目か（記録しなければ空）
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId, sortOrder])
+}
+
+// ===== AI 抽出の記録（30日で削除する）=====
+model AiExtraction {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String   @db.VarChar(20)
+  result    Json // AI が返した材料・手順・人数
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId]) // 同じ人・同じ動画は1回だけ（再抽出時は上書き）
+  @@index([userId, createdAt]) // 1日の利用回数を数える
+}
+
+// ===== 買い物リスト（1.0）=====
+model ShoppingListEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  servings  Int // 何人分作るか
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+}
+
+// ===== カテゴリ（1.0）=====
+model Category {
+  id     String @id @default(cuid())
+  userId String
+  name   String @db.VarChar(30)
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipes Recipe[]
+
+  @@unique([userId, name])
+}
