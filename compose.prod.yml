@@ -1,6 +1,5 @@
-# 本番用の構成：MySQL → マイグレーション → アプリ の順に起動する
+# 本番用の構成：MySQL → マイグレーション → アプリ → HTTPS の受付係（Caddy）の順に起動する
 # 起動方法：docker compose -f compose.prod.yml --env-file .env.production up -d --build
-# HTTPS の受付係（Caddy または Nginx）は、サーバーに公開するときに追加する
 
 services:
   db:
@@ -49,8 +48,24 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+    # 外からは直接つながせない（Caddy からだけ使う）
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
     ports:
-      - "3000:3000"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # 取得した証明書を保存する（消えると再取得になる）
+      - caddy-data:/data
+      - caddy-config:/config
 
 volumes:
   db-data:
+  caddy-data:
+  caddy-config:

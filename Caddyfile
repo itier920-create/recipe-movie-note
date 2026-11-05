@@ -1,0 +1,11 @@
+# HTTPS の受付係 Caddy の設定（証明書の取得と更新は Caddy が自動で行う）
+
+# 本体のドメインへのアクセスを、アプリ（app コンテナの 3000 番）へ渡す
+recipe-movie-note.com {
+	reverse_proxy app:3000
+}
+
+# www 付きで来たら、www なしの URL へ転送する
+www.recipe-movie-note.com {
+	redir https://recipe-movie-note.com{uri} permanent
+}
