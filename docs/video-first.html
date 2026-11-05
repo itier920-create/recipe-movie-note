@@ -1,0 +1,282 @@
+<title>動画が主役のレシピ帳</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 1カラムの読み物。比較は2カラム、デモはスマホ風の枠で中央に置く */
+:root {
+  --bg: #f5f5f4;
+  --surface: #ffffff;
+  --fg: #1c1917;
+  --muted: #57534e;
+  --line: #e7e5e4;
+  --accent: #c2410c;
+  --accent-soft: #ffedd5;
+  --accent-ink: #7c2d12;
+  --rival: #78716c;
+  --rival-soft: #eeedeb;
+  --player: #292524;
+  --player-ink: #fafaf9;
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1917; --surface: #292524; --fg: #fafaf9; --muted: #a8a29e; --line: #44403c;
+    --accent: #fb923c; --accent-soft: #431407; --accent-ink: #fed7aa;
+    --rival: #a8a29e; --rival-soft: #35302d; --player: #0c0a09; --player-ink: #fafaf9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1917; --surface: #292524; --fg: #fafaf9; --muted: #a8a29e; --line: #44403c;
+  --accent: #fb923c; --accent-soft: #431407; --accent-ink: #fed7aa;
+  --rival: #a8a29e; --rival-soft: #35302d; --player: #0c0a09; --player-ink: #fafaf9;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.8;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; line-height: 1.4; margin: 0; }
+h1 { font-size: clamp(28px, 6vw, 40px); }
+h2 { font-size: 22px; }
+p { margin: 0; }
+.eyebrow { font-size: 13px; letter-spacing: 0.08em; color: var(--accent); font-weight: 700; }
+.lead { font-size: 18px; color: var(--muted); max-width: 40em; }
+.lead strong { color: var(--fg); }
+section { display: flex; flex-direction: column; gap: 20px; }
+.sub { color: var(--muted); max-width: 40em; }
+
+/* 2つの考え方 */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.idea { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.idea.ours { border: 2px solid var(--accent); }
+.tag { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--rival-soft); color: var(--rival); }
+.ours .tag { background: var(--accent-soft); color: var(--accent-ink); }
+.idea h3 { font-family: var(--font-display); font-size: 19px; margin: 0; line-height: 1.5; }
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.chip { padding: 4px 10px; border-radius: 8px; background: var(--rival-soft); }
+.ours .chip { background: var(--accent-soft); color: var(--accent-ink); }
+.chip.faded { opacity: 0.55; text-decoration: line-through; }
+.arrow { color: var(--muted); }
+.idea p { font-size: 15px; color: var(--muted); }
+
+/* デモ */
+.demo { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 640px) { .demo { grid-template-columns: 1fr; } }
+.phone { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.player { background: var(--player); color: var(--player-ink); aspect-ratio: 16 / 9; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
+.player-top { font-size: 12px; opacity: 0.75; }
+.scene { font-family: var(--font-display); font-size: 18px; text-align: center; }
+.bar { position: relative; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.25); }
+.bar-fill { position: absolute; inset: 0 auto 0 0; background: #fb923c; border-radius: 3px; transition: width 0.35s ease; }
+.mark { position: absolute; top: -3px; width: 2px; height: 12px; background: rgba(255,255,255,0.7); }
+.time { font-family: var(--font-mono); font-size: 12px; display: flex; justify-content: space-between; }
+.steps { list-style: none; margin: 0; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.steps button {
+  width: 100%; display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; align-items: center; text-align: left;
+  font: inherit; font-size: 14px; color: var(--fg); background: transparent; border: 1px solid transparent;
+  border-radius: 10px; padding: 10px; cursor: pointer;
+}
+.steps button:hover { background: var(--rival-soft); }
+.steps button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.steps button[aria-current="step"] { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
+.num { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.ts { font-family: var(--font-mono); font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--rival-soft); color: var(--muted); }
+.nav { display: flex; gap: 8px; padding: 0 12px 14px; }
+.nav button { flex: 1; font: inherit; font-size: 15px; font-weight: 500; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.nav button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.demo-notes { display: flex; flex-direction: column; gap: 14px; font-size: 15px; }
+.demo-notes h3 { font-family: var(--font-display); font-size: 17px; margin: 0; }
+.demo-notes ul { margin: 0; padding-left: 1.2em; color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); }
+
+/* 操作回数の比較 */
+.ops { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.op { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.op.ours { border: 2px solid var(--accent); }
+.op h3 { font-size: 15px; margin: 0; font-weight: 700; }
+.op ol { margin: 0; padding-left: 1.4em; font-size: 15px; }
+.count { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+.op.ours .count { color: var(--accent); }
+.count small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+
+/* 表 */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 15px; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+th { font-size: 13px; color: var(--muted); font-weight: 500; }
+.keep { color: var(--muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.new { color: var(--accent); font-size: 13px; font-weight: 700; white-space: nowrap; }
+
+.persona { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.persona q { font-family: var(--font-display); font-size: 19px; quotes: "「" "」"; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px; }
+@media (prefers-reduced-motion: reduce) { .bar-fill { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:16px">
+    <p class="eyebrow">レシピムービー帳 ／ 差別化の説明</p>
+    <h1>競合は「動画を読まなくていいレシピ」に、<br>私たちは「動画を見ながら作れるレシピ」にする</h1>
+    <p class="lead">マグネットレシピは、動画から材料と手順を取り出して<strong>文章のレシピに置き換える</strong>アプリです。レシピムービー帳は、材料と手順を取り出すところまでは同じですが、<strong>動画を画面に残し、手順と動画の場面を結びつけます。</strong>このページでは、その違いを画面のイメージで説明します。</p>
+  </header>
+
+  <section aria-labelledby="s-idea">
+    <h2 id="s-idea">2つの考え方</h2>
+    <div class="compare">
+      <article class="idea">
+        <span class="tag">競合（マグネットレシピ）</span>
+        <h3>動画を文章に変換する</h3>
+        <div class="flow"><span class="chip">動画</span><span class="arrow">→</span><span class="chip">材料・手順の文章</span><span class="arrow">→</span><span class="chip faded">動画は見ない</span></div>
+        <p>保存したあとは文章のレシピが中心です。動画を見たいときは YouTube に移動します。</p>
+      </article>
+      <article class="idea ours">
+        <span class="tag">レシピムービー帳</span>
+        <h3>動画と手順をセットで使う</h3>
+        <div class="flow"><span class="chip">動画</span><span class="arrow">＋</span><span class="chip">材料・手順</span><span class="arrow">→</span><span class="chip">手順から場面へ飛ぶ</span></div>
+        <p>アプリの中で動画を再生し、各手順に「何分何秒の場面か」を持たせます。文章で分かりにくいところは、その場で動画を見て確かめられます。</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-demo">
+    <h2 id="s-demo">触って試す：手順をタップすると、その場面へ</h2>
+    <p class="sub">下のスマホ画面の手順をタップするか、「次へ」を押してください。動画のバーがその手順の場面に移動します（動画はイメージです）。</p>
+    <div class="demo">
+      <div class="phone">
+        <div class="player" aria-live="polite">
+          <div class="player-top">オムライス（2人分）</div>
+          <div class="scene" id="scene">玉ねぎをみじん切りにする</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="bar" id="bar"><div class="bar-fill" id="fill"></div></div>
+            <div class="time"><span id="now">1:20</span><span>7:00</span></div>
+          </div>
+        </div>
+        <ol class="steps" id="steps"></ol>
+        <div class="nav">
+          <button type="button" id="prev">前へ</button>
+          <button type="button" id="next" class="primary">次へ</button>
+        </div>
+      </div>
+      <div class="demo-notes">
+        <h3>この画面でできること</h3>
+        <ul>
+          <li>動画は画面の上に固定され、手順を読んでいる間も見える</li>
+          <li>今の手順がオレンジで強調され、どこまで進んだかが分かる</li>
+          <li>手順をタップすると、動画がその場面から再生される</li>
+          <li>「前へ／次へ」は大きめのボタンで、料理中の手でも押しやすい</li>
+        </ul>
+        <h3>時間はどうやって入れるか</h3>
+        <ul>
+          <li>MVP：動画を見ながら「今の位置を記録」ボタンを押して入れる</li>
+          <li>将来：動画をAIで解析し、手順と時間を自動で入れる（挑戦枠）</li>
+        </ul>
+        <p class="note">実際のアプリでは YouTube の埋め込みプレーヤーを使います。再生や場面の移動では YouTube API の利用枠を消費しません。</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-ops">
+    <h2 id="s-ops">「卵で包む場面をもう一度見たい」とき</h2>
+    <p class="sub">料理中は、文章だけでは分かりにくい手つきを動画で確かめたくなります。そのときの操作を比べました。</p>
+    <div class="ops">
+      <div class="op">
+        <h3>競合</h3>
+        <ol>
+          <li>「動画を見る」で YouTube アプリに移動する</li>
+          <li>シークバーを動かして、卵で包む場面を探す</li>
+          <li>見終わったら、レシピアプリに戻る</li>
+          <li>どの手順まで進んでいたかを探し直す</li>
+        </ol>
+        <p class="count">4<small>操作＋場面探し</small></p>
+      </div>
+      <div class="op ours">
+        <h3>レシピムービー帳</h3>
+        <ol>
+          <li>手順「卵で包む」をタップする</li>
+        </ol>
+        <p class="count">1<small>操作。アプリから出ない</small></p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-table">
+    <h2 id="s-table">競合から取り入れること・変えること</h2>
+    <p class="sub">競合の分かりやすい部分はそのまま取り入れ、動画まわりの使い勝手を変えます。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>機能</th><th>方針</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>URL を貼って登録</td><td class="keep">取り入れる</td><td>URL を貼ると、AI が概要欄から材料・人数・手順を取り出す</td></tr>
+          <tr><td>買い物リスト</td><td class="keep">取り入れる</td><td>レシピを選び、人数を指定して追加する（献立の機能は作らない）</td></tr>
+          <tr><td>動画の再生</td><td class="new">変える</td><td>YouTube に移動せず、アプリの中で再生する</td></tr>
+          <tr><td>手順</td><td class="new">変える</td><td>手順ごとに動画の時間を持たせ、タップでその場面に飛ぶ</td></tr>
+          <tr><td>調理モード</td><td class="new">足す</td><td>動画を固定し、今の手順を強調し、画面が消えないようにする</td></tr>
+          <tr><td>買い物リストの内訳</td><td class="new">足す</td><td>材料をタップすると、どのレシピでどれだけ使うかが分かる</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-who">
+    <h2 id="s-who">誰のための違いか</h2>
+    <div class="persona">
+      <q>文章だけだと「きつね色」や「とろみがつくまで」が分からない。動画で手つきを見ながら作りたい</q>
+      <p class="sub">料理に慣れていない人ほど、文章より動画を頼りにします。競合が「動画を見なくても作れる」ことで時間を節約するのに対し、レシピムービー帳は「動画を見ながら迷わず作れる」ことで失敗を減らします。</p>
+    </div>
+  </section>
+
+  <footer>レシピムービー帳（ポートフォリオ作品）の設計説明。画面はイメージで、実際の見た目は開発中に変わることがあります。</footer>
+</div>
+
+<script>
+const STEPS = [
+  { text: "玉ねぎをみじん切りにする", t: 80 },
+  { text: "鶏肉と玉ねぎを炒める", t: 165 },
+  { text: "ご飯とケチャップを加える", t: 250 },
+  { text: "卵で包む", t: 330 },
+];
+const TOTAL = 420;
+let cur = 0;
+const fmt = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+const list = document.getElementById("steps");
+const bar = document.getElementById("bar");
+STEPS.forEach((s, i) => {
+  const m = document.createElement("span");
+  m.className = "mark";
+  m.style.left = (s.t / TOTAL * 100) + "%";
+  bar.appendChild(m);
+  const li = document.createElement("li");
+  const b = document.createElement("button");
+  b.type = "button";
+  b.innerHTML = '<span class="num">' + (i + 1) + '</span><span></span><span class="ts">' + fmt(s.t) + '</span>';
+  b.children[1].textContent = s.text;
+  b.addEventListener("click", () => go(i));
+  li.appendChild(b);
+  list.appendChild(li);
+});
+function go(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[cur];
+  document.getElementById("fill").style.width = (s.t / TOTAL * 100) + "%";
+  document.getElementById("now").textContent = fmt(s.t);
+  document.getElementById("scene").textContent = s.text;
+  list.querySelectorAll("button").forEach((b, j) => {
+    if (j === cur) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+  });
+}
+document.getElementById("prev").addEventListener("click", () => go(cur - 1));
+document.getElementById("next").addEventListener("click", () => go(cur + 1));
+go(0);
+</script>
