@@ -1,5 +1,4 @@
 // レシピムービー帳のテーブル定義
-// ログイン用の Account テーブルは、Auth.js を導入するとき（第3週）に追加する
 
 generator client {
   provider = "prisma-client"
@@ -24,6 +23,7 @@ model User {
   categories    Category[]
   shoppingList  ShoppingListEntry[]
   aiExtractions AiExtraction[]
+  accounts      Account[]
 }
 
 // ===== レシピ =====
@@ -112,4 +112,23 @@ model Category {
   recipes Recipe[]
 
   @@unique([userId, name])
+}
+
+// ===== ログイン方法（Google など）と User の対応表。Auth.js が自動で保存する =====
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
 }
