@@ -14,6 +14,7 @@ model User {
   id             String    @id @default(cuid())
   name           String?
   email          String?   @unique
+  emailVerified  DateTime?
   image          String?
   isGuest        Boolean   @default(false) // お試しアカウントかどうか
   guestExpiresAt DateTime? // この日時を過ぎたら自動で削除する
