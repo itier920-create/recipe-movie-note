@@ -39,9 +39,16 @@ export default function Home() {
               Google でログイン
             </Button>
           </form>
-          <Button size="lg" variant="outline">
-            お試しで使う
-          </Button>
+          <form
+            action={async () => {
+              "use server";
+              await signIn("guest");
+            }}
+          >
+            <Button className="w-full" size="lg" variant="outline">
+              お試しで使う
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </main>
