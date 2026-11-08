@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 
 // 環境構築の確認用トップページ（ログイン機能を作るときに置き換える）
 export default function Home() {
@@ -57,11 +57,26 @@ export default function Home() {
     </main>
   );
 }
+// ログイン中のユーザー名とログアウトボタンを表示する（Cookie を読むので <Suspense> の中に置く）
 async function UserName() {
   const session = await auth();
 
   if (!session?.user) {
     return null;
   }
-  return <p className="text-sm">{session.user.name}さんでログイン中</p>;
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm">{session.user.name}さんでログイン中</p>
+      <form
+        action={async () => {
+          "use server";
+          await signOut();
+        }}
+      >
+        <Button size="sm" variant="outline">
+          ログアウト
+        </Button>
+      </form>
+    </div>
+  );
 }
