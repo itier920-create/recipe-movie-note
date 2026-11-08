@@ -22,7 +22,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/src/generated ./src/generated
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+# ビルド中は DB に接続しないが、src/server/db.ts は読み込まれた時点で DATABASE_URL があるかを確かめる。
+# そのため、ビルドのときだけ仮の値を渡す（本番で動くときは compose.prod.yml の本物の値が使われる）
+RUN DATABASE_URL="mysql://build:build@localhost:3306/build" npm run build
 
 # ===== 4. マイグレーション用（DB のテーブルを最新にして終了する）=====
 FROM base AS migrator
