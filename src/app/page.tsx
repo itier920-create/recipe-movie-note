@@ -31,32 +31,16 @@ export default function Home() {
             YouTubeの料理動画をレシピとして保存し、材料を買い物リストにまとめられます。
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <form
-            action={async () => {
-              "use server";
-              await signIn("google");
-            }}
-          >
-            <Button className="w-full" size="lg">
-              Google でログイン
-            </Button>
-          </form>
-          <form
-            action={async () => {
-              "use server";
-              await signIn("guest");
-            }}
-          >
-            <Button className="w-full" size="lg" variant="outline">
-              お試しで使う
-            </Button>
-          </form>
+        <CardContent>
+          <Suspense>
+            <LoginButtons />
+          </Suspense>
         </CardContent>
       </Card>
     </main>
   );
 }
+
 // ログイン中のユーザー名とログアウトボタンを表示する（Cookie を読むので <Suspense> の中に置く）
 async function UserName() {
   const session = await auth();
@@ -75,6 +59,40 @@ async function UserName() {
       >
         <Button size="sm" variant="outline">
           ログアウト
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+// ログインしていない人にだけログインボタンを表示する（Cookie を読むので <Suspense> の中に置く）
+async function LoginButtons() {
+  const session = await auth();
+
+  if (session?.user) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <form
+        action={async () => {
+          "use server";
+          await signIn("google");
+        }}
+      >
+        <Button className="w-full" size="lg">
+          Google でログイン
+        </Button>
+      </form>
+      <form
+        action={async () => {
+          "use server";
+          await signIn("guest");
+        }}
+      >
+        <Button className="w-full" size="lg" variant="outline">
+          お試しで使う
         </Button>
       </form>
     </div>
