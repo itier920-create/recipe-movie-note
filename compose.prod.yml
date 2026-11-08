@@ -44,7 +44,8 @@ services:
     restart: unless-stopped
     env_file: .env.production
     environment:
-      DATABASE_URL: mysql://app:${MYSQL_PASSWORD}@db:3306/recipe_movie_note
+      # allowPublicKeyRetrieval=true：MySQL の再起動直後でも、アプリが DB に接続できるようにする
+      DATABASE_URL: mysql://app:${MYSQL_PASSWORD}@db:3306/recipe_movie_note?allowPublicKeyRetrieval=true
     depends_on:
       migrate:
         condition: service_completed_successfully
