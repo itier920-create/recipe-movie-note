@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 
 // 環境構築の確認用トップページ（ログイン機能を作るときに置き換える）
 export default function Home() {
@@ -20,7 +21,9 @@ export default function Home() {
         </div>
         <span className="text-xl font-medium">レシピムービー帳</span>
       </div>
-
+      <Suspense>
+        <UserName />
+      </Suspense>
       <Card>
         <CardHeader>
           <CardTitle>動画を見ながら、料理しよう</CardTitle>
@@ -53,4 +56,12 @@ export default function Home() {
       </Card>
     </main>
   );
+}
+async function UserName() {
+  const session = await auth();
+
+  if (!session?.user) {
+    return null;
+  }
+  return <p className="text-sm">{session.user.name}さんでログイン中</p>;
 }
