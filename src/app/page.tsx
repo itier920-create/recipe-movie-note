@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { signIn } from "@/auth";
 
 // 環境構築の確認用トップページ（ログイン機能を作るときに置き換える）
 export default function Home() {
@@ -28,7 +29,16 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <Button size="lg">Google でログイン</Button>
+          <form
+            action={async () => {
+              "use server";
+              await signIn("google");
+            }}
+          >
+            <Button className="w-full" size="lg">
+              Google でログイン
+            </Button>
+          </form>
           <Button size="lg" variant="outline">
             お試しで使う
           </Button>
