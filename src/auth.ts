@@ -29,4 +29,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   session: { strategy: "jwt" }, // ゲストログイン(Credentials)はJWT方式でしか使えないため
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.isGuest = user.isGuest;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub;
+        session.user.isGuest = token.isGuest;
+      }
+      return session;
+    },
+  },
 });
