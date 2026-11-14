@@ -30,6 +30,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: "jwt" }, // ゲストログイン(Credentials)はJWT方式でしか使えないため
   callbacks: {
+    async signIn() {
+      const session = await auth();
+      if (session) {
+        return false;
+      }
+      return true;
+    },
     jwt({ token, user }) {
       if (user) {
         token.isGuest = user.isGuest;
