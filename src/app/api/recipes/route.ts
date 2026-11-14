@@ -32,6 +32,13 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!Array.isArray(body.ingredients) || !Array.isArray(body.steps)) {
+    return Response.json(
+      { error: "材料と手順を正しく送ってください" },
+      { status: 400 },
+    );
+  }
+
   try {
     const recipe = await prisma.recipe.create({
       data: {
