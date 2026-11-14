@@ -5,6 +5,17 @@ import { prisma } from "@/server/db";
 type CreateRecipeBody = {
   title: string;
   videoId?: string;
+  ingredients: {
+    name: string;
+    amountText: string;
+    quantity?: number;
+    unit?: string;
+    isSeasoning: boolean;
+  }[];
+  steps: {
+    text: string;
+    startSeconds?: number;
+  }[];
 };
 
 export async function POST(request: Request) {
@@ -27,7 +38,20 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title: body.title,
         videoId: body.videoId,
+        ingredients: {
+          create: body.ingredients.map((item, index) => ({
+            ...item,
+            sortOrder: index,
+          })),
+        },
+        steps: {
+          create: body.steps.map((item, index) => ({
+            ...item,
+            sortOrder: index,
+          })),
+        },
       },
+      include: { ingredients: true, steps: true },
     });
     return Response.json(recipe, { status: 201 });
   } catch (error) {
