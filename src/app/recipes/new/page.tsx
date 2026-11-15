@@ -18,9 +18,9 @@ export default function NewRecipePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
-        videoId,
-        ingredients,
-        steps,
+        videoId: videoId || undefined,
+        ingredients: ingredients.filter((item) => item.name !== ""),
+        steps: steps.filter((item) => item.text !== ""),
       }),
     });
 
