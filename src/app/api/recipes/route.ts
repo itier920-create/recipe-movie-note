@@ -39,6 +39,17 @@ export async function POST(request: Request) {
     );
   }
 
+  if (body.ingredients.some((item) => item.name === "")) {
+    return Response.json(
+      { error: "材料名を入力してください" },
+      { status: 400 },
+    );
+  }
+
+  if (body.steps.some((item) => item.text === "")) {
+    return Response.json({ error: "手順を入力してください" }, { status: 400 });
+  }
+
   try {
     const recipe = await prisma.recipe.create({
       data: {
