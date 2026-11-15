@@ -5,6 +5,9 @@ import React, { useState } from "react";
 export default function NewRecipePage() {
   const [title, setTitle] = useState("");
   const [videoId, setVideoId] = useState("");
+  const [ingredients, setIngredients] = useState([
+    { name: "", amountText: "" },
+  ]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -15,7 +18,7 @@ export default function NewRecipePage() {
       body: JSON.stringify({
         title,
         videoId,
-        ingredients: [],
+        ingredients,
         steps: [],
       }),
     });
@@ -32,6 +35,40 @@ export default function NewRecipePage() {
     <form onSubmit={handleSubmit}>
       <input value={title} onChange={(e) => setTitle(e.target.value)} />
       <input value={videoId} onChange={(e) => setVideoId(e.target.value)} />
+      {ingredients.map((item, index) => (
+        <div key={index}>
+          <input
+            value={item.name}
+            onChange={(e) =>
+              setIngredients(
+                ingredients.map((row, i) =>
+                  i === index ? { ...row, name: e.target.value } : row,
+                ),
+              )
+            }
+            placeholder="材料名"
+          />
+          <input
+            value={item.amountText}
+            onChange={(e) =>
+              setIngredients(
+                ingredients.map((row, i) =>
+                  i === index ? { ...row, amountText: e.target.value } : row,
+                ),
+              )
+            }
+            placeholder="分量"
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() =>
+          setIngredients([...ingredients, { name: "", amountText: "" }])
+        }
+      >
+        材料を追加
+      </button>
       <button type="submit">登録</button>
     </form>
   );
