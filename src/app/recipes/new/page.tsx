@@ -8,6 +8,7 @@ export default function NewRecipePage() {
   const [ingredients, setIngredients] = useState([
     { name: "", amountText: "" },
   ]);
+  const [steps, setSteps] = useState([{ text: "" }]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,7 +20,7 @@ export default function NewRecipePage() {
         title,
         videoId,
         ingredients,
-        steps: [],
+        steps,
       }),
     });
 
@@ -68,6 +69,24 @@ export default function NewRecipePage() {
         }
       >
         材料を追加
+      </button>
+      {steps.map((item, index) => (
+        <div key={index}>
+          <textarea
+            value={item.text}
+            onChange={(e) =>
+              setSteps(
+                steps.map((row, i) =>
+                  i === index ? { ...row, text: e.target.value } : row,
+                ),
+              )
+            }
+            placeholder="手順"
+          />
+        </div>
+      ))}
+      <button type="button" onClick={() => setSteps([...steps, { text: "" }])}>
+        手順を追加
       </button>
       <button type="submit">登録</button>
     </form>
