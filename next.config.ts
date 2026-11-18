@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // YouTube のサムネイル画像だけを <Image> で表示できるように許可する
+    remotePatterns: [new URL("https://i.ytimg.com/vi/**")],
+  },
   turbopack: {
     rules: {
       "*.css": {
