@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { Suspense } from "react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/server/db";
+import { notFound } from "next/navigation";
 
 export default function Page({ params }: PageProps<"/recipes/[id]">) {
   return (
@@ -35,11 +37,12 @@ async function RecipeDetail({
     },
   });
   if (!recipe) {
-    return null;
+    notFound();
   }
 
   return (
     <div>
+      <Link href={`/recipes/`}>一覧に戻る</Link>
       {recipe.videoId && (
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${recipe.videoId}`}
@@ -49,7 +52,7 @@ async function RecipeDetail({
         />
       )}
       <h1>{recipe.title}</h1>
-
+      <p>{recipe.servings}人分</p>
       <h2>材料</h2>
       <ul>
         {recipe.ingredients.map((ingredient) => (
@@ -58,7 +61,6 @@ async function RecipeDetail({
           </li>
         ))}
       </ul>
-
       <h2>手順</h2>
       <ol>
         {recipe.steps.map((step) => (
