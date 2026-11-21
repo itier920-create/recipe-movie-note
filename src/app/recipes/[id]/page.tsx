@@ -29,10 +29,34 @@ async function RecipeDetail({
 
   const recipe = await prisma.recipe.findFirst({
     where: { id: id, userId: session.user.id },
+    include: {
+      ingredients: { orderBy: { sortOrder: "asc" } },
+      steps: { orderBy: { sortOrder: "asc" } },
+    },
   });
   if (!recipe) {
     return null;
   }
 
-  return <p>{recipe.title}</p>;
+  return (
+    <div>
+      <h1>{recipe.title}</h1>
+
+      <h2>材料</h2>
+      <ul>
+        {recipe.ingredients.map((ingredient) => (
+          <li key={ingredient.id}>
+            {ingredient.name} {ingredient.amountText}
+          </li>
+        ))}
+      </ul>
+
+      <h2>手順</h2>
+      <ol>
+        {recipe.steps.map((step) => (
+          <li key={step.id}>{step.text}</li>
+        ))}
+      </ol>
+    </div>
+  );
 }
