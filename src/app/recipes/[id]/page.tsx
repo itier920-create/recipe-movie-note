@@ -40,6 +40,14 @@ async function RecipeDetail({
 
   return (
     <div>
+      {recipe.videoId && (
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${recipe.videoId}`}
+          title={recipe.title}
+          allowFullScreen
+          className="aspect-video w-full"
+        />
+      )}
       <h1>{recipe.title}</h1>
 
       <h2>材料</h2>
