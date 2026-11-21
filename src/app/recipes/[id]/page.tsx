@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/server/db";
-import { notFound } from "next/navigation";
 
 export default function Page({ params }: PageProps<"/recipes/[id]">) {
   return (
@@ -42,7 +42,7 @@ async function RecipeDetail({
 
   return (
     <div>
-      <Link href={`/recipes/`}>一覧に戻る</Link>
+      <Link href="/recipes">一覧に戻る</Link>
       {recipe.videoId && (
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${recipe.videoId}`}
