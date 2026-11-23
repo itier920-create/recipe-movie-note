@@ -5,6 +5,7 @@ import React, { useState } from "react";
 export default function NewRecipePage() {
   const [title, setTitle] = useState("");
   const [videoId, setVideoId] = useState("");
+  const [url, setUrl] = useState("");
   const [ingredients, setIngredients] = useState([
     { name: "", amountText: "" },
   ]);
@@ -32,8 +33,31 @@ export default function NewRecipePage() {
     }
   }
 
+  async function handleExtract() {
+    const res = await fetch("/api/recipes/extract", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      console.log(data);
+    } else {
+      alert(data.error);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit}>
+      <input
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="YouTube の URL"
+      />
+      <button type="button" onClick={handleExtract}>
+        AIで取り出す
+      </button>
       <input value={title} onChange={(e) => setTitle(e.target.value)} />
       <input value={videoId} onChange={(e) => setVideoId(e.target.value)} />
       {ingredients.map((item, index) => (
