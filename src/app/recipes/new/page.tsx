@@ -5,6 +5,7 @@ import React, { useState } from "react";
 export default function NewRecipePage() {
   const [title, setTitle] = useState("");
   const [videoId, setVideoId] = useState("");
+  const [servings, setServings] = useState("");
   const [url, setUrl] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [ingredients, setIngredients] = useState([
@@ -21,6 +22,7 @@ export default function NewRecipePage() {
       body: JSON.stringify({
         title,
         videoId: videoId || undefined,
+        servings: servings ? Number(servings) : undefined,
         ingredients: ingredients.filter((item) => item.name !== ""),
         steps: steps.filter((item) => item.text !== ""),
       }),
@@ -46,6 +48,7 @@ export default function NewRecipePage() {
       if (res.ok) {
         setTitle(data.title);
         setVideoId(data.videoId);
+        setServings(data.servings === null ? "" : String(data.servings));
         setIngredients(data.ingredients);
         setSteps(data.steps);
       } else {
@@ -68,6 +71,12 @@ export default function NewRecipePage() {
       </button>
       <input value={title} onChange={(e) => setTitle(e.target.value)} />
       <input value={videoId} onChange={(e) => setVideoId(e.target.value)} />
+      <input
+        type="number"
+        value={servings}
+        onChange={(e) => setServings(e.target.value)}
+        placeholder="何人分"
+      />
       {ingredients.map((item, index) => (
         <div key={index}>
           <input
