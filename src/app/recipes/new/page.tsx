@@ -42,7 +42,10 @@ export default function NewRecipePage() {
 
     const data = await res.json();
     if (res.ok) {
-      console.log(data);
+      setTitle(data.title);
+      setVideoId(data.videoId);
+      setIngredients(data.ingredients);
+      setSteps(data.steps);
     } else {
       alert(data.error);
     }
