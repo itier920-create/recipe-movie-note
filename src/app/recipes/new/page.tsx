@@ -6,6 +6,7 @@ export default function NewRecipePage() {
   const [title, setTitle] = useState("");
   const [videoId, setVideoId] = useState("");
   const [url, setUrl] = useState("");
+  const [isExtracting, setIsExtracting] = useState(false);
   const [ingredients, setIngredients] = useState([
     { name: "", amountText: "" },
   ]);
@@ -34,20 +35,24 @@ export default function NewRecipePage() {
   }
 
   async function handleExtract() {
-    const res = await fetch("/api/recipes/extract", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      setTitle(data.title);
-      setVideoId(data.videoId);
-      setIngredients(data.ingredients);
-      setSteps(data.steps);
-    } else {
-      alert(data.error);
+    setIsExtracting(true);
+    try {
+      const res = await fetch("/api/recipes/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTitle(data.title);
+        setVideoId(data.videoId);
+        setIngredients(data.ingredients);
+        setSteps(data.steps);
+      } else {
+        alert(data.error);
+      }
+    } finally {
+      setIsExtracting(false);
     }
   }
 
@@ -58,8 +63,8 @@ export default function NewRecipePage() {
         onChange={(e) => setUrl(e.target.value)}
         placeholder="YouTube の URL"
       />
-      <button type="button" onClick={handleExtract}>
-        AIで取り出す
+      <button type="button" onClick={handleExtract} disabled={isExtracting}>
+        {isExtracting ? "取り出し中..." : "AIで取り出す"}
       </button>
       <input value={title} onChange={(e) => setTitle(e.target.value)} />
       <input value={videoId} onChange={(e) => setVideoId(e.target.value)} />
