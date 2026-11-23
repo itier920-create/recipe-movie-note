@@ -5,6 +5,7 @@ import { prisma } from "@/server/db";
 type CreateRecipeBody = {
   title: string;
   videoId?: string;
+  servings?: number;
   ingredients: {
     name: string;
     amountText: string;
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title: body.title,
         videoId: body.videoId,
+        servings: body.servings,
         ingredients: {
           create: body.ingredients.map((item, index) => ({
             ...item,
