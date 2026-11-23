@@ -17,24 +17,27 @@ export default function NewRecipePage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    try {
+      const res = await fetch("/api/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          videoId: videoId || undefined,
+          servings: servings ? Number(servings) : undefined,
+          ingredients: ingredients.filter((item) => item.name !== ""),
+          steps: steps.filter((item) => item.text !== ""),
+        }),
+      });
 
-    const res = await fetch("/api/recipes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        videoId: videoId || undefined,
-        servings: servings ? Number(servings) : undefined,
-        ingredients: ingredients.filter((item) => item.name !== ""),
-        steps: steps.filter((item) => item.text !== ""),
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      router.push(`/recipes/${data.id}`);
-    } else {
-      alert(data.error);
+      const data = await res.json();
+      if (res.ok) {
+        router.push(`/recipes/${data.id}`);
+      } else {
+        alert(data.error);
+      }
+    } catch {
+      alert("登録に失敗しました。時間をおいてもう一度試してください");
     }
   }
 
@@ -56,6 +59,10 @@ export default function NewRecipePage() {
       } else {
         alert(data.error);
       }
+    } catch {
+      alert(
+        "レシピの取り出しに失敗しました。時間をおいてもう一度試してください",
+      );
     } finally {
       setIsExtracting(false);
     }
