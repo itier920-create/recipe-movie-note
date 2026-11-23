@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export default function NewRecipePage() {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [videoId, setVideoId] = useState("");
   const [servings, setServings] = useState("");
@@ -30,7 +32,7 @@ export default function NewRecipePage() {
 
     const data = await res.json();
     if (res.ok) {
-      alert("登録しました");
+      router.push(`/recipes/${data.id}`);
     } else {
       alert(data.error);
     }
