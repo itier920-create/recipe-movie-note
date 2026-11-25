@@ -1,5 +1,6 @@
 "use client";
 
+import { parseTime } from "@/lib/time";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -13,7 +14,7 @@ export default function RecipeForm() {
   const [ingredients, setIngredients] = useState([
     { name: "", amountText: "" },
   ]);
-  const [steps, setSteps] = useState([{ text: "" }]);
+  const [steps, setSteps] = useState([{ text: "", startTime: "" }]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,7 +27,12 @@ export default function RecipeForm() {
           videoId: videoId || undefined,
           servings: servings ? Number(servings) : undefined,
           ingredients: ingredients.filter((item) => item.name !== ""),
-          steps: steps.filter((item) => item.text !== ""),
+          steps: steps
+            .filter((item) => item.text !== "")
+            .map((item) => ({
+              text: item.text,
+              startSeconds: parseTime(item.startTime) ?? undefined,
+            })),
         }),
       });
 
@@ -55,7 +61,12 @@ export default function RecipeForm() {
         setVideoId(data.videoId);
         setServings(data.servings === null ? "" : String(data.servings));
         setIngredients(data.ingredients);
-        setSteps(data.steps);
+        setSteps(
+          data.steps.map((step: { text: string }) => ({
+            text: step.text,
+            startTime: "",
+          })),
+        );
       } else {
         alert(data.error);
       }
@@ -133,9 +144,23 @@ export default function RecipeForm() {
             }
             placeholder="手順"
           />
+          <input
+            value={item.startTime}
+            onChange={(e) =>
+              setSteps(
+                steps.map((row, i) =>
+                  i === index ? { ...row, startTime: e.target.value } : row,
+                ),
+              )
+            }
+            placeholder="動画の時間（例：1:23）"
+          />
         </div>
       ))}
-      <button type="button" onClick={() => setSteps([...steps, { text: "" }])}>
+      <button
+        type="button"
+        onClick={() => setSteps([...steps, { text: "", startTime: "" }])}
+      >
         手順を追加
       </button>
       <button type="submit">登録</button>

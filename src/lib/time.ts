@@ -1,7 +1,7 @@
 const TIME_PATTERN = /^(\d+):([0-5]\d)$/;
 
 export function parseTime(input: string): number | null {
-  const match = input.trim().match(TIME_PATTERN);
+  const match = input.normalize("NFKC").trim().match(TIME_PATTERN);
   if (!match) {
     return null;
   }
