@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/server/db";
+import { formatTime } from "@/lib/time";
 
 export default function Page({ params }: PageProps<"/recipes/[id]">) {
   return (
@@ -64,7 +65,12 @@ async function RecipeDetail({
       <h2>手順</h2>
       <ol>
         {recipe.steps.map((step) => (
-          <li key={step.id}>{step.text}</li>
+          <li key={step.id}>
+            {step.startSeconds !== null && (
+              <span>{formatTime(step.startSeconds)}</span>
+            )}
+            {step.text}
+          </li>
         ))}
       </ol>
     </div>
